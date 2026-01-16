@@ -172,9 +172,10 @@ export function SurveyClient({
           : null;
 
         // Capture image first (parallel with answer submission for speed)
-        const imageCapturePromise = faceDetectorRef.current && faceDetectionResult.detected
-          ? faceDetectorRef.current.captureImage()
-          : Promise.resolve(null);
+        const imageCapturePromise =
+          faceDetectorRef.current && faceDetectionResult.detected
+            ? faceDetectorRef.current.captureImage()
+            : Promise.resolve(null);
 
         // Submit answer first (must complete before image upload to set face_image_path)
         await submissionApi.submitAnswer(submissionId, {

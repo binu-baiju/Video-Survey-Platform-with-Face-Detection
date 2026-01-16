@@ -368,9 +368,10 @@ async def export_submission(submission_id: int, db: Session = Depends(get_db)):
         "overall_score": submission.overall_score
     }
     
-    # Create ZIP file in memory - optimized for large files
+    # Create ZIP file - use ZIP_STORED (no compression) for faster generation
+    # Compression saves space but takes time, ZIP_STORED is instant
     zip_buffer = BytesIO()
-    with zipfile.ZipFile(zip_buffer, 'w', zipfile.ZIP_DEFLATED, compresslevel=1) as zip_file:
+    with zipfile.ZipFile(zip_buffer, 'w', zipfile.ZIP_STORED) as zip_file:
         # Add metadata.json
         zip_file.writestr("metadata.json", json.dumps(metadata, indent=2))
         

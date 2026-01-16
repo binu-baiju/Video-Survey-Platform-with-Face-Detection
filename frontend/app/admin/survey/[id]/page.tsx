@@ -488,7 +488,7 @@ export default function SurveyDetailPage() {
                                         )
                                       : "http://localhost:8000")
                                   }${answer.face_image_path}`}
-                                  alt={`Visibility snapshot for question ${answer.question_order}`}
+                                  alt={`Q${answer.question_order}`}
                                   className="w-16 h-16 sm:w-20 sm:h-20 object-cover rounded-lg border border-border shrink-0"
                                 />
                               )}
