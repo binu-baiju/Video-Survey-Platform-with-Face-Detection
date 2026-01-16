@@ -370,18 +370,21 @@ async def export_submission(submission_id: int, db: Session = Depends(get_db)):
         "overall_score": submission.overall_score
     }
     
-    # Create ZIP file in memory
+    # Create ZIP file in memory - optimized for large files
     zip_buffer = BytesIO()
-    with zipfile.ZipFile(zip_buffer, 'w', zipfile.ZIP_DEFLATED) as zip_file:
+    with zipfile.ZipFile(zip_buffer, 'w', zipfile.ZIP_DEFLATED, compresslevel=1) as zip_file:
         # Add metadata.json
         zip_file.writestr("metadata.json", json.dumps(metadata, indent=2))
         
-        # Add videos
+        # Pre-organize files for better performance
         video_files = [m for m in media_files if m.type == "video"]
+        image_files = [m for m in media_files if m.type == "image"]
+        
+        # Add videos (skip if file doesn't exist to avoid errors)
         full_video = None
         for media in video_files:
-            if os.path.exists(media.path):
-                if "full" in media.path:
+            if os.path.exists(media.path) and os.path.getsize(media.path) > 0:
+                if "full" in media.path.lower():
                     full_video = media.path
                 else:
                     # Question-specific video
@@ -392,16 +395,21 @@ async def export_submission(submission_id: int, db: Session = Depends(get_db)):
                             question_num = q.order
                             break
                     if question_num:
-                        zip_file.write(media.path, f"videos/q{question_num}.mp4")
+                        try:
+                            zip_file.write(media.path, f"videos/q{question_num}.mp4")
+                        except Exception as e:
+                            print(f"Error adding video {media.path} to ZIP: {e}")
         
         # Add full session video if exists
-        if full_video:
-            zip_file.write(full_video, "videos/full_session.mp4")
+        if full_video and os.path.exists(full_video) and os.path.getsize(full_video) > 0:
+            try:
+                zip_file.write(full_video, "videos/full_session.mp4")
+            except Exception as e:
+                print(f"Error adding full video to ZIP: {e}")
         
         # Add face images
-        image_files = [m for m in media_files if m.type == "image"]
         for media in image_files:
-            if os.path.exists(media.path):
+            if os.path.exists(media.path) and os.path.getsize(media.path) > 0:
                 # Determine question number from path
                 question_num = None
                 for answer in answers:
@@ -410,7 +418,10 @@ async def export_submission(submission_id: int, db: Session = Depends(get_db)):
                         question_num = q.order
                         break
                 if question_num:
-                    zip_file.write(media.path, f"images/q{question_num}_face.png")
+                    try:
+                        zip_file.write(media.path, f"images/q{question_num}_face.png")
+                    except Exception as e:
+                        print(f"Error adding image {media.path} to ZIP: {e}")
     
     zip_buffer.seek(0)
     
@@ -465,13 +476,14 @@ async def serve_media_file(path: str):
     media_root = get_media_root()
     
     # Handle both relative paths (images/...) and full paths
-    if path.startswith(media_root):
-        # Full path provided, extract relative part
+    # Path comes as "images/submission_XX_qX_face_...png" from face_image_path
+    if os.path.isabs(path) and path.startswith(media_root):
+        # Full absolute path provided
         file_path = path
-        if not path.startswith(media_root):
-            raise HTTPException(status_code=403, detail="Access denied")
     else:
-        # Relative path provided
+        # Relative path provided (e.g., "images/submission_XX_qX_face_...png")
+        # Normalize path separators
+        path = path.replace("\\", "/").lstrip("/")
         file_path = os.path.join(media_root, path)
     
     # Security check: ensure file is within media root
@@ -481,7 +493,7 @@ async def serve_media_file(path: str):
         raise HTTPException(status_code=403, detail="Access denied")
     
     if not os.path.exists(file_path):
-        raise HTTPException(status_code=404, detail="File not found")
+        raise HTTPException(status_code=404, detail=f"File not found: {file_path}")
     
     # Determine media type from extension
     if file_path.endswith(('.png', '.jpg', '.jpeg', '.gif')):

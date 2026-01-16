@@ -201,7 +201,13 @@ export function SurveyClient({
           );
         }
 
-        // Submit answer
+        // Capture image first (parallel with answer submission for speed)
+        let imageBlob: Blob | null = null;
+        const imageCapturePromise = faceDetectorRef.current && faceDetectionResult.detected
+          ? faceDetectorRef.current.captureImage()
+          : Promise.resolve(null);
+
+        // Submit answer first (must complete before image upload to set face_image_path)
         await submissionApi.submitAnswer(submissionId, {
           question_id: question.id,
           answer: answer === "yes" ? "Yes" : "No",
@@ -209,10 +215,10 @@ export function SurveyClient({
           face_score: faceScore,
         });
 
-        // Capture and upload face snapshot
-        if (faceDetectorRef.current && faceDetectionResult.detected) {
-          const imageBlob = await faceDetectorRef.current.captureImage();
-          if (imageBlob) {
+        // Upload image after answer is submitted (image capture runs in parallel above)
+        imageBlob = await imageCapturePromise;
+        if (imageBlob && faceDetectionResult.detected) {
+          try {
             const imageFile = new File(
               [imageBlob],
               `q${question.order}_face.png`,
@@ -220,12 +226,17 @@ export function SurveyClient({
                 type: "image/png",
               }
             );
+            // Upload image - await to ensure it's saved before moving on
             await submissionApi.uploadMedia(
               submissionId,
               imageFile,
               "image",
               question.order
             );
+          } catch (err) {
+            console.error("Failed to upload image:", err);
+            // Don't fail the whole submission if image upload fails
+            // But log it for debugging
           }
         }
 
