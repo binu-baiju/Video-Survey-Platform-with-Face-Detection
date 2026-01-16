@@ -242,6 +242,12 @@ alembic upgrade head
    - No rate limiting implemented
    - No queue system for high traffic
 
+6. **Performance**:
+   - Video uploads can be slow for large files (especially full session videos)
+   - Submission process may take time due to sequential media uploads
+   - ZIP generation can be slow for submissions with large video files
+   - No client-side video compression before upload
+
 ## 🧪 Testing
 
 ```bash
