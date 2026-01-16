@@ -486,10 +486,7 @@ export default function SurveyDetailPage() {
                                   Yes
                                 </Badge>
                               ) : (
-                                <Badge
-                                  variant="secondary"
-                                  className="text-xs"
-                                >
+                                <Badge variant="secondary" className="text-xs">
                                   <XCircle className="w-3 h-3 mr-1" />
                                   No
                                 </Badge>
