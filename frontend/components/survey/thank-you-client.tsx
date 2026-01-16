@@ -289,35 +289,28 @@ export function ThankYouClient({
                         <div className="mt-3">
                           <img
                             src={(() => {
-                              const apiUrl = process.env.NEXT_PUBLIC_API_URL ||
+                              const apiUrl =
+                                process.env.NEXT_PUBLIC_API_URL ||
                                 (typeof window !== "undefined"
-                                  ? window.location.origin.replace(":3000", ":8000")
+                                  ? window.location.origin.replace(
+                                      ":3000",
+                                      ":8000"
+                                    )
                                   : "http://localhost:8000");
                               // Normalize URL - remove trailing slash from API_URL and leading slash from path
                               const baseUrl = apiUrl.replace(/\/+$/, "");
-                              const imagePath = answer.face_image_path.replace(/^\/+/, "");
+                              const imagePath = answer.face_image_path.replace(
+                                /^\/+/,
+                                ""
+                              );
                               return `${baseUrl}/${imagePath}`;
                             })()}
                             alt={`Snapshot for question ${answer.question_order}`}
                             className="w-20 h-20 sm:w-24 sm:h-24 object-cover rounded-lg border border-border"
                             onError={(e) => {
-                              console.error(
-                                "Failed to load image:",
-                                answer.face_image_path
-                              );
-                              console.error(
-                                "Full URL:",
-                                (e.target as HTMLImageElement).src
-                              );
                               // Hide broken image
                               (e.target as HTMLImageElement).style.display =
                                 "none";
-                            }}
-                            onLoad={() => {
-                              console.log(
-                                "Image loaded successfully:",
-                                answer.face_image_path
-                              );
                             }}
                           />
                         </div>
