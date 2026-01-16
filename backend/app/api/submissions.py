@@ -1,12 +1,11 @@
 from fastapi import APIRouter, Depends, HTTPException, status, Request, UploadFile, File, Form
 from sqlalchemy.orm import Session
-from sqlalchemy import func
 from app.database import get_db
 from app.models.submission import SurveySubmission, SurveyAnswer, MediaFile
 from app.models.survey import Survey, SurveyQuestion
 from app.schemas.submission import (
     SubmissionStartResponse, AnswerSubmit, AnswerResponse,
-    MediaUpload, MediaResponse, SubmissionComplete, SubmissionResponse,
+    MediaResponse, SubmissionComplete, SubmissionResponse,
     SubmissionDetailResponse, SubmissionListResponse, AnswerWithQuestion
 )
 from app.utils.metadata import extract_metadata
@@ -15,7 +14,6 @@ from fastapi.responses import FileResponse, StreamingResponse
 import os
 import zipfile
 import json
-from pathlib import Path
 from io import BytesIO
 from datetime import datetime
 
@@ -380,28 +378,15 @@ async def export_submission(submission_id: int, db: Session = Depends(get_db)):
         video_files = [m for m in media_files if m.type == "video"]
         image_files = [m for m in media_files if m.type == "image"]
         
-        # Add videos (skip if file doesn't exist to avoid errors)
+        # Add full session video only (assignment requirement - no question-specific videos)
         full_video = None
         for media in video_files:
             if os.path.exists(media.path) and os.path.getsize(media.path) > 0:
                 if "full" in media.path.lower():
                     full_video = media.path
-                else:
-                    # Question-specific video
-                    question_num = None
-                    for answer in answers:
-                        q = questions[answer.question_id]
-                        if f"_q{q.order}_" in media.path:
-                            question_num = q.order
-                            break
-                    if question_num:
-                        try:
-                            zip_file.write(media.path, f"videos/q{question_num}.mp4")
-                        except Exception as e:
-                            print(f"Error adding video {media.path} to ZIP: {e}")
+                    break
         
-        # Add full session video if exists
-        if full_video and os.path.exists(full_video) and os.path.getsize(full_video) > 0:
+        if full_video:
             try:
                 zip_file.write(full_video, "videos/full_session.mp4")
             except Exception as e:

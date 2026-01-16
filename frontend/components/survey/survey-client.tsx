@@ -34,7 +34,6 @@ export function SurveyClient({
   const videoRef = useRef<HTMLVideoElement>(null);
   const faceDetectorRef = useRef<FaceDetector | null>(null);
   const fullSessionRecorderRef = useRef<VideoRecorder | null>(null);
-  const questionRecorderRef = useRef<VideoRecorder | null>(null);
   const streamRef = useRef<MediaStream | null>(null);
 
   // Start submission when permission is granted
@@ -118,15 +117,10 @@ export function SurveyClient({
             });
             faceDetectorRef.current = detector;
 
-            // Start full session recording
+            // Start full session recording (only one video required by assignment)
             const fullRecorder = new VideoRecorder();
             await fullRecorder.start(stream);
             fullSessionRecorderRef.current = fullRecorder;
-
-            // Start question recording
-            const questionRecorder = new VideoRecorder();
-            await questionRecorder.start(stream);
-            questionRecorderRef.current = questionRecorder;
 
             // Start recording duration timer
             startRecordingTimer();
@@ -161,15 +155,6 @@ export function SurveyClient({
     }, 1000);
   };
 
-  const stopRecordingTimer = () => {
-    if (durationIntervalRef.current) {
-      clearInterval(durationIntervalRef.current);
-      durationIntervalRef.current = null;
-    }
-    recordingStartTimeRef.current = null;
-    setRecordingDuration(0);
-  };
-
   const handlePermissionGranted = useCallback(() => {
     setHasPermission(true);
   }, []);
@@ -186,23 +171,7 @@ export function SurveyClient({
           ? faceDetectionResult.score
           : null;
 
-        // Stop question recording
-        if (questionRecorderRef.current) {
-          stopRecordingTimer();
-          const videoBlob = await questionRecorderRef.current.stop();
-          const videoFile = new File([videoBlob], `q${question.order}.webm`, {
-            type: "video/webm",
-          });
-          await submissionApi.uploadMedia(
-            submissionId,
-            videoFile,
-            "video",
-            question.order
-          );
-        }
-
         // Capture image first (parallel with answer submission for speed)
-        let imageBlob: Blob | null = null;
         const imageCapturePromise = faceDetectorRef.current && faceDetectionResult.detected
           ? faceDetectorRef.current.captureImage()
           : Promise.resolve(null);
@@ -215,8 +184,8 @@ export function SurveyClient({
           face_score: faceScore,
         });
 
-        // Upload image after answer is submitted (image capture runs in parallel above)
-        imageBlob = await imageCapturePromise;
+        // Upload image - await to ensure path is saved (images are small, fast to upload)
+        const imageBlob = await imageCapturePromise;
         if (imageBlob && faceDetectionResult.detected) {
           try {
             const imageFile = new File(
@@ -226,7 +195,7 @@ export function SurveyClient({
                 type: "image/png",
               }
             );
-            // Upload image - await to ensure it's saved before moving on
+            // Await image upload to ensure face_image_path is set in database
             await submissionApi.uploadMedia(
               submissionId,
               imageFile,
@@ -236,21 +205,12 @@ export function SurveyClient({
           } catch (err) {
             console.error("Failed to upload image:", err);
             // Don't fail the whole submission if image upload fails
-            // But log it for debugging
           }
         }
 
         // Store face score
         if (faceScore !== null) {
           setFaceScores(new Map(faceScores.set(question.id, faceScore)));
-        }
-
-        // Start recording for next question
-        if (streamRef.current && currentQuestion < questions.length - 1) {
-          const questionRecorder = new VideoRecorder();
-          await questionRecorder.start(streamRef.current);
-          questionRecorderRef.current = questionRecorder;
-          startRecordingTimer(); // Restart timer for new question
         }
 
         // Move to next question or complete

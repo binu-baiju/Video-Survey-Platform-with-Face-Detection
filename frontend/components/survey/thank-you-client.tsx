@@ -299,7 +299,31 @@ export function ThankYouClient({
                             }${answer.face_image_path}`}
                             alt={`Snapshot for question ${answer.question_order}`}
                             className="w-20 h-20 sm:w-24 sm:h-24 object-cover rounded-lg border border-border"
+                            onError={(e) => {
+                              console.error(
+                                "Failed to load image:",
+                                answer.face_image_path
+                              );
+                              console.error(
+                                "Full URL:",
+                                (e.target as HTMLImageElement).src
+                              );
+                              // Hide broken image
+                              (e.target as HTMLImageElement).style.display =
+                                "none";
+                            }}
+                            onLoad={() => {
+                              console.log(
+                                "Image loaded successfully:",
+                                answer.face_image_path
+                              );
+                            }}
                           />
+                        </div>
+                      )}
+                      {!answer.face_image_path && (
+                        <div className="mt-3 text-xs text-muted-foreground">
+                          No snapshot available
                         </div>
                       )}
                     </div>
