@@ -1,6 +1,19 @@
 import axios from "axios";
 
-const API_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8000";
+// Get API URL from environment variable (set in production via Vercel/Railway)
+// Falls back to localhost for local development
+const getApiUrl = () => {
+  if (process.env.NEXT_PUBLIC_API_URL) {
+    return process.env.NEXT_PUBLIC_API_URL;
+  }
+  // Fallback for local development
+  if (typeof window !== "undefined") {
+    return window.location.origin.replace(":3000", ":8000");
+  }
+  return "http://localhost:8000";
+};
+
+export const API_URL = getApiUrl();
 
 const api = axios.create({
   baseURL: API_URL,

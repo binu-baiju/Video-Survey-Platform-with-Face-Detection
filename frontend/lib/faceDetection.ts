@@ -45,7 +45,7 @@ export class FaceDetector {
     this.ctx = this.canvas.getContext("2d");
 
     // Initialize camera
-    if (navigator.mediaDevices && navigator.mediaDevices.getUserMedia) {
+    if (navigator.mediaDevices && typeof navigator.mediaDevices.getUserMedia === 'function') {
       const camera = new Camera(this.videoElement, {
         onFrame: async () => {
           if (

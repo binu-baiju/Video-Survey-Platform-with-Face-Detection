@@ -290,7 +290,12 @@ export function ThankYouClient({
                           <img
                             src={`${
                               process.env.NEXT_PUBLIC_API_URL ||
-                              "http://localhost:8000"
+                              (typeof window !== "undefined"
+                                ? window.location.origin.replace(
+                                    ":3000",
+                                    ":8000"
+                                  )
+                                : "http://localhost:8000")
                             }${answer.face_image_path}`}
                             alt={`Snapshot for question ${answer.question_order}`}
                             className="w-20 h-20 sm:w-24 sm:h-24 object-cover rounded-lg border border-border"

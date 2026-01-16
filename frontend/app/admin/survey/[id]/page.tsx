@@ -53,6 +53,7 @@ export default function SurveyDetailPage() {
 
   useEffect(() => {
     loadData();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [surveyId]);
 
   const loadData = async () => {
@@ -480,7 +481,12 @@ export default function SurveyDetailPage() {
                                 <img
                                   src={`${
                                     process.env.NEXT_PUBLIC_API_URL ||
-                                    "http://localhost:8000"
+                                    (typeof window !== "undefined"
+                                      ? window.location.origin.replace(
+                                          ":3000",
+                                          ":8000"
+                                        )
+                                      : "http://localhost:8000")
                                   }${answer.face_image_path}`}
                                   alt={`Visibility snapshot for question ${answer.question_order}`}
                                   className="w-16 h-16 sm:w-20 sm:h-20 object-cover rounded-lg border border-border shrink-0"
