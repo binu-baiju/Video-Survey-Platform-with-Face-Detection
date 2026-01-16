@@ -98,7 +98,10 @@ export function ThankYouClient({
   if (loading) {
     return (
       <div className="min-h-screen flex items-center justify-center">
-        <div className="text-xl text-muted-foreground">Loading...</div>
+        <div className="flex flex-col items-center gap-4">
+          <Loader2 className="w-8 h-8 text-primary animate-spin" />
+          <p className="text-muted-foreground">Loading submission data...</p>
+        </div>
       </div>
     );
   }

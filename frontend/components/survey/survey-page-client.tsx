@@ -4,7 +4,7 @@ import { useEffect, useState } from "react"
 import Link from "next/link"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent } from "@/components/ui/card"
-import { Video, Home } from "lucide-react"
+import { Video, Home, Loader2 } from "lucide-react"
 import { surveyApi } from "@/lib/api"
 import { SurveyClient } from "./survey-client"
 
@@ -50,8 +50,8 @@ export function SurveyPageClient({ surveyId }: SurveyPageClientProps) {
   if (loading) {
     return (
       <div className="min-h-screen flex items-center justify-center">
-        <div className="text-center">
-          <div className="w-8 h-8 border-2 border-primary border-t-transparent rounded-full animate-spin mx-auto mb-4" />
+        <div className="flex flex-col items-center gap-4">
+          <Loader2 className="w-8 h-8 text-primary animate-spin" />
           <p className="text-muted-foreground">Loading survey...</p>
         </div>
       </div>

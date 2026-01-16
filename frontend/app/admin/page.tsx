@@ -14,7 +14,7 @@ import {
 } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
-import { Video, Plus, Home, RefreshCw, Eye, ExternalLink } from "lucide-react";
+import { Video, Plus, Home, RefreshCw, Eye, ExternalLink, Loader2 } from "lucide-react";
 
 export default function AdminPage() {
   const router = useRouter();
@@ -192,9 +192,12 @@ export default function AdminPage() {
             </Button>
           </CardHeader>
           <CardContent>
-            {loadingSurveys ? (
-              <p className="text-muted-foreground">Loading surveys...</p>
-            ) : surveys.length === 0 ? (
+                  {loadingSurveys ? (
+                    <div className="flex items-center justify-center gap-2 py-8">
+                      <Loader2 className="w-5 h-5 text-primary animate-spin" />
+                      <p className="text-muted-foreground">Loading surveys...</p>
+                    </div>
+                  ) : surveys.length === 0 ? (
               <p className="text-muted-foreground">No surveys created yet.</p>
             ) : (
               <div className="space-y-2">

@@ -36,6 +36,7 @@ import {
   ChevronUp,
   CheckCircle,
   XCircle,
+  Loader2,
 } from "lucide-react";
 import { surveyApi, submissionApi } from "@/lib/api";
 
@@ -180,11 +181,10 @@ export default function SurveyDetailPage() {
   if (loading) {
     return (
       <div className="min-h-screen bg-background flex items-center justify-center">
-        <Card className="text-center py-12 max-w-md">
-          <CardContent>
-            <h3 className="text-lg font-semibold mb-2">Loading...</h3>
-          </CardContent>
-        </Card>
+        <div className="flex flex-col items-center gap-4">
+          <Loader2 className="w-8 h-8 text-primary animate-spin" />
+          <p className="text-muted-foreground">Loading survey data...</p>
+        </div>
       </div>
     );
   }
