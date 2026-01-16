@@ -1,0 +1,57 @@
+# Dependencies
+node_modules/
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+venv/
+env/
+ENV/
+
+# Build outputs
+.next/
+out/
+dist/
+build/
+*.egg-info/
+
+# Environment variables
+.env
+.env.local
+.env*.local
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Media files (keep structure, ignore content)
+media/videos/*
+media/images/*
+!media/videos/.gitkeep
+!media/images/.gitkeep
+
+# Database
+*.db
+*.sqlite
+
+# Logs
+*.log
+logs/
+
+# Docker
+.dockerignore
+
+# Documentation (keep README.md, exclude AI-generated guides)
+HOSTING_GUIDE.md
+DEPLOYMENT_CHECKLIST.md
+PLATFORM_COMPARISON.md
+ASSIGNMENT_VERIFICATION.md
+PROJECT_SUMMARY.md
