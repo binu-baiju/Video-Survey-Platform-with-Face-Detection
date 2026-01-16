@@ -476,58 +476,39 @@ export default function SurveyDetailPage() {
                             key={answer.id}
                             className="border border-border rounded-lg p-4"
                           >
-                            <div className="flex flex-col sm:flex-row items-start gap-3 sm:gap-4">
-                              {answer.face_image_path && (
-                                <img
-                                  src={`${
-                                    process.env.NEXT_PUBLIC_API_URL ||
-                                    (typeof window !== "undefined"
-                                      ? window.location.origin.replace(
-                                          ":3000",
-                                          ":8000"
-                                        )
-                                      : "http://localhost:8000")
-                                  }${answer.face_image_path}`}
-                                  alt={`Q${answer.question_order}`}
-                                  className="w-16 h-16 sm:w-20 sm:h-20 object-cover rounded-lg border border-border shrink-0"
-                                />
+                            <div className="flex flex-wrap items-center gap-2 mb-1">
+                              <span className="text-xs sm:text-sm font-medium text-muted-foreground">
+                                Q{answer.question_order}
+                              </span>
+                              {answer.answer === "Yes" ? (
+                                <Badge className="bg-emerald-500/10 text-emerald-600 hover:bg-emerald-500/20 text-xs">
+                                  <CheckCircle className="w-3 h-3 mr-1" />
+                                  Yes
+                                </Badge>
+                              ) : (
+                                <Badge
+                                  variant="secondary"
+                                  className="text-xs"
+                                >
+                                  <XCircle className="w-3 h-3 mr-1" />
+                                  No
+                                </Badge>
                               )}
-                              <div className="flex-1 min-w-0">
-                                <div className="flex flex-wrap items-center gap-2 mb-1">
-                                  <span className="text-xs sm:text-sm font-medium text-muted-foreground">
-                                    Q{answer.question_order}
-                                  </span>
-                                  {answer.answer === "Yes" ? (
-                                    <Badge className="bg-emerald-500/10 text-emerald-600 hover:bg-emerald-500/20 text-xs">
-                                      <CheckCircle className="w-3 h-3 mr-1" />
-                                      Yes
-                                    </Badge>
-                                  ) : (
-                                    <Badge
-                                      variant="secondary"
-                                      className="text-xs"
-                                    >
-                                      <XCircle className="w-3 h-3 mr-1" />
-                                      No
-                                    </Badge>
-                                  )}
-                                </div>
-                                <p className="text-xs sm:text-sm mb-2 break-words">
-                                  {answer.question_text}
-                                </p>
-                                <div className="flex flex-wrap items-center gap-3 sm:gap-4 text-xs text-muted-foreground">
-                                  <span>
-                                    Visibility Score:{" "}
-                                    {answer.face_score !== null
-                                      ? `${answer.face_score}%`
-                                      : "N/A"}
-                                  </span>
-                                  <span>
-                                    Face Visible:{" "}
-                                    {answer.face_detected ? "Yes" : "No"}
-                                  </span>
-                                </div>
-                              </div>
+                            </div>
+                            <p className="text-xs sm:text-sm mb-2 break-words">
+                              {answer.question_text}
+                            </p>
+                            <div className="flex flex-wrap items-center gap-3 sm:gap-4 text-xs text-muted-foreground">
+                              <span>
+                                Visibility Score:{" "}
+                                {answer.face_score !== null
+                                  ? `${answer.face_score}%`
+                                  : "N/A"}
+                              </span>
+                              <span>
+                                Face Visible:{" "}
+                                {answer.face_detected ? "Yes" : "No"}
+                              </span>
                             </div>
                           </div>
                         ))
